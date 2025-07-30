@@ -1,0 +1,34 @@
+{
+  "name": "@immoflow/api",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "lint": "eslint . --ext .ts"
+  },
+  "dependencies": {
+    "fastify": "^4.24.0",
+    "@fastify/cors": "^8.4.0",
+    "@fastify/multipart": "^8.0.0",
+    "@fastify/jwt": "^7.2.0",
+    "@fastify/env": "^4.2.0",
+    "@supabase/supabase-js": "^2.38.0",
+    "openai": "^4.20.0",
+    "langchain": "^0.0.200",
+    "pdf-parse": "^1.1.1",
+    "multer": "^1.4.5-lts.1",
+    "whatsapp-web.js": "^1.23.0",
+    "puppeteer": "^21.5.0",
+    "qrcode": "^1.5.3",
+    "zod": "^3.22.0",
+    "dotenv": "^16.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/multer": "^1.4.11",
+    "@types/qrcode": "^1.5.5",
+    "tsx": "^4.6.0"
+  }
+}
