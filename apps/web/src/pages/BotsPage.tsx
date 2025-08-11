@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Plus, Bot, Play, Pause, Settings, BarChart3, MessageSquare } from 'lucide-react'
+import { useAuth } from '../contexts/AuthContext'
+import { useToast } from '../contexts/ToastContext'
+import { Loading } from '../components/Loading'
 
 interface Bot {
   id: string
@@ -13,6 +16,8 @@ interface Bot {
 }
 
 export function BotsPage() {
+  const { session } = useAuth()
+  const { toast } = useToast()
   const [bots, setBots] = useState<Bot[]>([])
   const [loading, setLoading] = useState(true)
   const [showCreateModal, setShowCreateModal] = useState(false)
@@ -20,8 +25,6 @@ export function BotsPage() {
   const [newBotDescription, setNewBotDescription] = useState('')
   const [newBotMode, setNewBotMode] = useState<'assistido' | 'avancado'>('assistido')
   const [createLoading, setCreateLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
 
   useEffect(() => {
     fetchBots()
@@ -31,7 +34,7 @@ export function BotsPage() {
     try {
       const response = await fetch('/api/bots/bots', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('supabase.auth.token')}`
+          'Authorization': `Bearer ${session?.access_token || ''}`
         }
       })
 
@@ -49,15 +52,13 @@ export function BotsPage() {
   const handleCreateBot = async (e: React.FormEvent) => {
     e.preventDefault()
     setCreateLoading(true)
-    setError('')
-    setSuccess('')
 
     try {
       const response = await fetch('/api/bots/bots', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('supabase.auth.token')}`
+          'Authorization': `Bearer ${session?.access_token || ''}`
         },
         body: JSON.stringify({
           name: newBotName,
@@ -69,16 +70,16 @@ export function BotsPage() {
       const data = await response.json()
 
       if (response.ok) {
-        setSuccess('Bot criado com sucesso!')
+        toast('Bot criado com sucesso!', 'success')
         setNewBotName('')
         setNewBotDescription('')
         setShowCreateModal(false)
         fetchBots()
       } else {
-        setError(data.error)
+        toast(data?.error || 'Erro ao criar bot', 'error')
       }
     } catch (err) {
-      setError('Erro ao criar bot')
+      toast('Erro ao criar bot', 'error')
     } finally {
       setCreateLoading(false)
     }
@@ -89,7 +90,7 @@ export function BotsPage() {
       const response = await fetch(`/api/bots/bots/${botId}/toggle`, {
         method: 'PATCH',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('supabase.auth.token')}`
+          'Authorization': `Bearer ${session?.access_token || ''}`
         }
       })
 
@@ -102,11 +103,7 @@ export function BotsPage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>
-    )
+    return <Loading />
   }
 
   return (
@@ -126,14 +123,13 @@ export function BotsPage() {
         </button>
       </div>
 
-      {/* Mensagens */}
-      {error && (
-        <div className="text-red-600 text-sm bg-red-50 p-3 rounded-md">{error}</div>
-      )}
-      
-      {success && (
-        <div className="text-green-600 text-sm bg-green-50 p-3 rounded-md">{success}</div>
-      )}
+	      <div className="flex justify-end">
+	        <button onClick={fetchBots} disabled={loading} className="px-3 py-1.5 text-sm border rounded hover:bg-gray-50 disabled:opacity-50">
+	          Recarregar
+	        </button>
+	      </div>
+
+
 
       {/* Lista de bots */}
       {bots.length === 0 ? (
@@ -169,8 +165,8 @@ export function BotsPage() {
                 </div>
                 <div className="flex items-center space-x-2">
                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    bot.is_active 
-                      ? 'bg-green-100 text-green-800' 
+                    bot.is_active
+                      ? 'bg-green-100 text-green-800'
                       : 'bg-gray-100 text-gray-800'
                   }`}>
                     {bot.is_active ? 'Ativo' : 'Inativo'}
@@ -241,7 +237,7 @@ export function BotsPage() {
           <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
             <div className="mt-3">
               <h3 className="text-lg font-medium text-gray-900 mb-4">Criar Novo Bot</h3>
-              
+
               <form onSubmit={handleCreateBot} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -256,7 +252,7 @@ export function BotsPage() {
                     placeholder="Ex: Assistente Imobiliário"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Descrição (opcional)
@@ -269,7 +265,7 @@ export function BotsPage() {
                     placeholder="Descreva o propósito do bot..."
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Modo
@@ -286,7 +282,7 @@ export function BotsPage() {
                     Modo assistido oferece templates prontos. Modo avançado permite edição completa.
                   </p>
                 </div>
-                
+
                 <div className="flex justify-end space-x-3 pt-4">
                   <button
                     type="button"

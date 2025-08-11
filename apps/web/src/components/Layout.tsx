@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { ApiHealthBanner } from './ApiHealthBanner'
+
 import {
   LayoutDashboard,
   Users,
@@ -157,6 +159,12 @@ export function Layout({ children }: LayoutProps) {
         </div>
       </div>
 
+	        {/* Banner de saúde da API (desktop) */}
+	        <div className="hidden lg:block">
+	          <ApiHealthBanner />
+	        </div>
+
+
       {/* Conteúdo principal */}
       <div className="lg:pl-64">
         {/* Header mobile */}
@@ -171,6 +179,9 @@ export function Layout({ children }: LayoutProps) {
           <div className="flex-1 text-sm font-semibold leading-6 text-gray-900">
             ImmoFlow
           </div>
+
+	        <ApiHealthBanner />
+
         </div>
 
         {/* Conteúdo da página */}

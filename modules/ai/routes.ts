@@ -13,7 +13,7 @@ export default async function aiRoutes(fastify: FastifyInstance) {
     try {
       const data = await request.file()
       if (!data) {
-        return reply.status(400).send({ error: 'Arquivo de áudio não fornecido' })
+        return reply.fail({ message: 'Arquivo de áudio não fornecido' }, 400)
       }
 
       const { leadId } = request.body as any
@@ -28,7 +28,7 @@ export default async function aiRoutes(fastify: FastifyInstance) {
         })
 
       if (uploadError) {
-        return reply.status(500).send({ error: 'Erro ao fazer upload do arquivo' })
+        return reply.fail({ message: 'Erro ao fazer upload do arquivo' }, 500)
       }
 
       // Transcrever áudio com Whisper
@@ -81,17 +81,17 @@ export default async function aiRoutes(fastify: FastifyInstance) {
         .single()
 
       if (dbError) {
-        return reply.status(500).send({ error: 'Erro ao salvar no banco de dados' })
+        return reply.fail({ message: 'Erro ao salvar no banco de dados' }, 500)
       }
 
-      return {
+      return reply.success({
         interaction,
         transcription,
         analysis: aiAnalysis
-      }
+      })
     } catch (error) {
       console.error('Erro ao processar áudio:', error)
-      return reply.status(500).send({ error: 'Erro interno do servidor' })
+      return reply.fail({ message: 'Erro interno do servidor' }, 500)
     }
   })
 
@@ -100,7 +100,7 @@ export default async function aiRoutes(fastify: FastifyInstance) {
     try {
       const data = await request.file()
       if (!data) {
-        return reply.status(400).send({ error: 'Arquivo de imagem não fornecido' })
+        return reply.fail({ message: 'Arquivo de imagem não fornecido' }, 400)
       }
 
       const { leadId } = request.body as any
@@ -115,7 +115,7 @@ export default async function aiRoutes(fastify: FastifyInstance) {
         })
 
       if (uploadError) {
-        return reply.status(500).send({ error: 'Erro ao fazer upload do arquivo' })
+        return reply.fail({ message: 'Erro ao fazer upload do arquivo' }, 500)
       }
 
       // Analisar imagem com GPT-4 Vision
@@ -180,16 +180,16 @@ export default async function aiRoutes(fastify: FastifyInstance) {
         .single()
 
       if (dbError) {
-        return reply.status(500).send({ error: 'Erro ao salvar no banco de dados' })
+        return reply.fail({ message: 'Erro ao salvar no banco de dados' }, 500)
       }
 
-      return {
+      return reply.success({
         interaction,
         analysis: aiAnalysis
-      }
+      })
     } catch (error) {
       console.error('Erro ao processar imagem:', error)
-      return reply.status(500).send({ error: 'Erro interno do servidor' })
+      return reply.fail({ message: 'Erro interno do servidor' }, 500)
     }
   })
 
@@ -198,7 +198,7 @@ export default async function aiRoutes(fastify: FastifyInstance) {
     try {
       const data = await request.file()
       if (!data) {
-        return reply.status(400).send({ error: 'Arquivo PDF não fornecido' })
+        return reply.fail({ message: 'Arquivo PDF não fornecido' }, 400)
       }
 
       const { leadId } = request.body as any
@@ -213,7 +213,7 @@ export default async function aiRoutes(fastify: FastifyInstance) {
         })
 
       if (uploadError) {
-        return reply.status(500).send({ error: 'Erro ao fazer upload do arquivo' })
+        return reply.fail({ message: 'Erro ao fazer upload do arquivo' }, 500)
       }
 
       // Extrair texto do PDF
@@ -267,17 +267,17 @@ export default async function aiRoutes(fastify: FastifyInstance) {
         .single()
 
       if (dbError) {
-        return reply.status(500).send({ error: 'Erro ao salvar no banco de dados' })
+        return reply.fail({ message: 'Erro ao salvar no banco de dados' }, 500)
       }
 
-      return {
+      return reply.success({
         interaction,
         extractedText: extractedText.substring(0, 500) + '...', // Retornar apenas uma prévia
         analysis: aiAnalysis
-      }
+      })
     } catch (error) {
       console.error('Erro ao processar PDF:', error)
-      return reply.status(500).send({ error: 'Erro interno do servidor' })
+      return reply.fail({ message: 'Erro interno do servidor' }, 500)
     }
   })
 
@@ -341,10 +341,10 @@ export default async function aiRoutes(fastify: FastifyInstance) {
         }
       }
 
-      return { classification: result }
+      return reply.success({ classification: result })
     } catch (error) {
       console.error('Erro ao classificar lead:', error)
-      return reply.status(500).send({ error: 'Erro interno do servidor' })
+      return reply.fail({ message: 'Erro interno do servidor' }, 500)
     }
   })
 }

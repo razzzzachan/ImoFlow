@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { User, Key, Bell, Database, Bot } from 'lucide-react'
+import { User, Key, Bell, Database, Bot, Settings } from 'lucide-react'
+import { PreferencesSection } from './settings/PreferencesSection'
 
 export function SettingsPage() {
   const { user } = useAuth()
@@ -29,7 +30,8 @@ export function SettingsPage() {
     { id: 'notifications', name: 'Notificações', icon: Bell },
     { id: 'ai', name: 'IA & Automação', icon: Bot },
     { id: 'integrations', name: 'Integrações', icon: Database },
-    { id: 'security', name: 'Segurança', icon: Key }
+    { id: 'preferences', name: 'Preferências', icon: Settings },
+    { id: 'security', name: 'Segurança', icon: Key },
   ]
 
   const handleSaveProfile = async () => {
@@ -110,7 +112,7 @@ export function SettingsPage() {
                       onChange={(e) => setProfile(prev => ({ ...prev, name: e.target.value }))}
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Email
@@ -125,7 +127,7 @@ export function SettingsPage() {
                       O email não pode ser alterado
                     </p>
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Telefone
@@ -138,7 +140,7 @@ export function SettingsPage() {
                       placeholder="(11) 99999-9999"
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Função
@@ -153,7 +155,7 @@ export function SettingsPage() {
                       <option value="admin">Administrador</option>
                     </select>
                   </div>
-                  
+
                   <div className="flex justify-end">
                     <button
                       onClick={handleSaveProfile}
@@ -183,7 +185,7 @@ export function SettingsPage() {
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
                   </div>
-                  
+
                   <div className="flex items-center justify-between">
                     <div>
                       <h4 className="text-sm font-medium text-gray-900">Lembretes de tarefas</h4>
@@ -196,7 +198,7 @@ export function SettingsPage() {
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
                   </div>
-                  
+
                   <div className="flex items-center justify-between">
                     <div>
                       <h4 className="text-sm font-medium text-gray-900">Mensagens WhatsApp</h4>
@@ -209,7 +211,7 @@ export function SettingsPage() {
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
                   </div>
-                  
+
                   <div className="flex items-center justify-between">
                     <div>
                       <h4 className="text-sm font-medium text-gray-900">Relatórios por email</h4>
@@ -222,7 +224,7 @@ export function SettingsPage() {
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
                   </div>
-                  
+
                   <div className="flex justify-end">
                     <button
                       onClick={handleSaveNotifications}
@@ -252,7 +254,7 @@ export function SettingsPage() {
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
                   </div>
-                  
+
                   <div className="flex items-center justify-between">
                     <div>
                       <h4 className="text-sm font-medium text-gray-900">Respostas automáticas</h4>
@@ -265,7 +267,7 @@ export function SettingsPage() {
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
                   </div>
-                  
+
                   <div className="flex items-center justify-between">
                     <div>
                       <h4 className="text-sm font-medium text-gray-900">Análise de sentimento</h4>
@@ -278,7 +280,7 @@ export function SettingsPage() {
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
                   </div>
-                  
+
                   <div className="flex items-center justify-between">
                     <div>
                       <h4 className="text-sm font-medium text-gray-900">Pontuação de leads</h4>
@@ -291,7 +293,7 @@ export function SettingsPage() {
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
                   </div>
-                  
+
                   <div className="flex justify-end">
                     <button
                       onClick={handleSaveAISettings}
@@ -309,6 +311,13 @@ export function SettingsPage() {
               <div className="p-6">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Integrações</h3>
                 <p className="text-gray-500">Configurações de integrações em desenvolvimento...</p>
+              </div>
+            )}
+
+            {activeTab === 'preferences' && (
+              <div className="p-6">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Preferências</h3>
+                <PreferencesSection />
               </div>
             )}
 

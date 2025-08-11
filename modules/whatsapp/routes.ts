@@ -12,10 +12,10 @@ export default async function whatsappRoutes(fastify: FastifyInstance) {
       
       const qrCode = await whatsappService.initialize(userId)
       
-      return { qrCode, message: 'WhatsApp inicializado. Escaneie o QR Code.' }
+      return reply.success({ qrCode, message: 'WhatsApp inicializado. Escaneie o QR Code.' })
     } catch (error) {
       console.error('Erro ao inicializar WhatsApp:', error)
-      return reply.status(500).send({ error: 'Erro ao inicializar WhatsApp' })
+      return reply.fail({ message: 'Erro ao inicializar WhatsApp' }, 500)
     }
   })
 
@@ -24,11 +24,11 @@ export default async function whatsappRoutes(fastify: FastifyInstance) {
     try {
       const userId = (request as any).user.id
       const status = await whatsappService.getConnectionStatus(userId)
-      
-      return { status }
+
+      return reply.success({ status })
     } catch (error) {
       console.error('Erro ao obter status:', error)
-      return reply.status(500).send({ error: 'Erro ao obter status' })
+      return reply.fail({ message: 'Erro ao obter status' }, 500)
     }
   })
 
@@ -37,11 +37,11 @@ export default async function whatsappRoutes(fastify: FastifyInstance) {
     try {
       const userId = (request as any).user.id
       await whatsappService.disconnect(userId)
-      
-      return { message: 'WhatsApp desconectado com sucesso' }
+
+      return reply.success({ message: 'WhatsApp desconectado com sucesso' })
     } catch (error) {
       console.error('Erro ao desconectar:', error)
-      return reply.status(500).send({ error: 'Erro ao desconectar WhatsApp' })
+      return reply.fail({ message: 'Erro ao desconectar WhatsApp' }, 500)
     }
   })
 
@@ -57,7 +57,7 @@ export default async function whatsappRoutes(fastify: FastifyInstance) {
       const userId = (request as any).user.id
       
       const success = await whatsappService.sendMessage(phone, message)
-      
+
       if (success && leadId) {
         // Registrar interação no banco
         await supabase
@@ -73,11 +73,11 @@ export default async function whatsappRoutes(fastify: FastifyInstance) {
             }
           }])
       }
-      
-      return { success, message: success ? 'Mensagem enviada' : 'Falha ao enviar mensagem' }
+
+      return reply.success({ success, message: success ? 'Mensagem enviada' : 'Falha ao enviar mensagem' })
     } catch (error) {
       console.error('Erro ao enviar mensagem:', error)
-      return reply.status(500).send({ error: 'Erro ao enviar mensagem' })
+      return reply.fail({ message: 'Erro ao enviar mensagem' }, 500)
     }
   })
 
@@ -85,11 +85,11 @@ export default async function whatsappRoutes(fastify: FastifyInstance) {
   fastify.get('/conversations', { preHandler: [fastify.authenticate] }, async (request, reply) => {
     try {
       const conversations = await whatsappService.getRecentConversations()
-      
-      return { conversations }
+
+      return reply.success({ conversations })
     } catch (error) {
       console.error('Erro ao listar conversas:', error)
-      return reply.status(500).send({ error: 'Erro ao listar conversas' })
+      return reply.fail({ message: 'Erro ao listar conversas' }, 500)
     }
   })
 
@@ -113,10 +113,10 @@ export default async function whatsappRoutes(fastify: FastifyInstance) {
         }
       }
       
-      return { status: 'ok' }
+      return reply.success({ status: 'ok' })
     } catch (error) {
       console.error('Erro no webhook:', error)
-      return reply.status(500).send({ error: 'Erro no webhook' })
+      return reply.fail({ message: 'Erro no webhook' }, 500)
     }
   })
 
@@ -151,11 +151,11 @@ export default async function whatsappRoutes(fastify: FastifyInstance) {
         message,
         keywords: keywords || []
       })
-      
-      return { message: 'Resposta automática configurada' }
+
+      return reply.success({ message: 'Resposta automática configurada' })
     } catch (error) {
       console.error('Erro ao configurar resposta automática:', error)
-      return reply.status(500).send({ error: 'Erro ao configurar resposta automática' })
+      return reply.fail({ message: 'Erro ao configurar resposta automática' }, 500)
     }
   })
 
@@ -177,7 +177,7 @@ export default async function whatsappRoutes(fastify: FastifyInstance) {
         .eq('source', 'whatsapp')
         .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
 
-      return {
+      return reply.success({
         messages: {
           inbound,
           outbound,
@@ -187,10 +187,10 @@ export default async function whatsappRoutes(fastify: FastifyInstance) {
           total: leads?.length || 0,
           thisWeek: leads?.length || 0
         }
-      }
+      })
     } catch (error) {
       console.error('Erro ao obter métricas:', error)
-      return reply.status(500).send({ error: 'Erro ao obter métricas' })
+      return reply.fail({ message: 'Erro ao obter métricas' }, 500)
     }
   })
 }

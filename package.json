@@ -1,7 +1,7 @@
 {
   "name": "immoflow",
   "version": "1.0.0",
-  "description": "Sistema completo de CRM imobiliário com IA multimodal e atendimento WhatsApp",
+  "description": "🏠 O sistema definitivo para imobiliárias com IA especializada - Plataforma SaaS plug-and-play que automatiza atendimento, vendas e gestão",
   "private": true,
   "workspaces": [
     "apps/*",
@@ -10,9 +10,11 @@
   "scripts": {
     "setup": "chmod +x scripts/setup.sh && scripts/setup.sh",
     "setup:windows": "scripts\\setup.bat",
+    "setup:mvp": "node scripts/setup-mvp.js",
     "git:setup": "chmod +x scripts/git-setup.sh && scripts/git-setup.sh",
     "git:setup:windows": "scripts\\git-setup.bat",
     "dev": "concurrently \"npm run dev:api\" \"npm run dev:web\"",
+    "dev:demo": "cd apps/api && npx tsx src/server-demo.ts",
     "dev:api": "npm run dev --workspace=apps/api",
     "dev:web": "npm run dev --workspace=apps/web",
     "build": "npm run build --workspaces",
@@ -30,7 +32,9 @@
     "eslint": "^8.54.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.1",
+    "pino-pretty": "^13.1.1",
     "prettier": "^3.1.0",
+    "tsx": "^4.20.3",
     "typescript": "^5.3.0"
   },
   "engines": {

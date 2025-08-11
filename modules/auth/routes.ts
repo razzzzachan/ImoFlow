@@ -5,44 +5,6 @@ import { AuthService } from './service'
 const authService = new AuthService()
 
 export default async function authRoutes(fastify: FastifyInstance) {
-  // Middleware de autenticação
-  fastify.decorate('authenticate', async function (request: any, reply: any) {
-    try {
-      const token = request.headers.authorization?.replace('Bearer ', '')
-      if (!token) {
-        return reply.status(401).send({ error: 'Token não fornecido' })
-      }
-
-      const { data: { user }, error } = await supabase.auth.getUser(token)
-      if (error || !user) {
-        return reply.status(401).send({ error: 'Token inválido' })
-      }
-
-      // Buscar dados completos do usuário
-      const { data: userData } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', user.id)
-        .single()
-
-      request.user = { ...user, ...userData }
-    } catch (error) {
-      return reply.status(401).send({ error: 'Erro de autenticação' })
-    }
-  })
-
-  // Middleware para verificar role
-  fastify.decorate('requireRole', (roles: string[]) => {
-    return async function (request: any, reply: any) {
-      if (!request.user) {
-        return reply.status(401).send({ error: 'Usuário não autenticado' })
-      }
-
-      if (!roles.includes(request.user.role)) {
-        return reply.status(403).send({ error: 'Acesso negado' })
-      }
-    }
-  })
 
   // Rota de login
   fastify.post('/login', async (request, reply) => {

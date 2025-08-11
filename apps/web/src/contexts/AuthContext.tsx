@@ -1,10 +1,12 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { createClient, User, Session } from '@supabase/supabase-js'
 
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL!,
-  import.meta.env.VITE_SUPABASE_ANON_KEY!
-)
+const DEMO = (import.meta as any).env?.VITE_DEMO === 'true'
+
+const supabase = !DEMO ? createClient(
+  (import.meta as any).env?.VITE_SUPABASE_URL!,
+  (import.meta as any).env?.VITE_SUPABASE_ANON_KEY!
+) : null as any
 
 interface AuthContextType {
   user: User | null
@@ -23,6 +25,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    if (DEMO) {
+      setSession(null)
+      setUser(null)
+      setLoading(false)
+      return
+    }
+
     // Obter sessão inicial
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
@@ -43,6 +52,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const signIn = async (email: string, password: string) => {
+    if (DEMO) return {}
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email,
@@ -60,6 +70,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signUp = async (email: string, password: string, name: string, phone?: string, companyName?: string) => {
+    if (DEMO) return {}
     try {
       // Usar a API customizada em vez do Supabase diretamente
       const response = await fetch('/api/auth/register', {
@@ -90,6 +101,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signOut = async () => {
+    if (DEMO) return
     await supabase.auth.signOut()
   }
 

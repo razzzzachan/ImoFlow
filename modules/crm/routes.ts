@@ -1,45 +1,53 @@
 import { FastifyInstance } from 'fastify'
 import { supabase } from '../auth/supabase'
 import { CRMService } from './service'
+import { CreateLeadUseCase } from './application/use-cases/CreateLead'
+import { CRMRepository } from './infra/repositories/CRMRepository'
 
 const crmService = new CRMService()
+const crmRepo = new CRMRepository()
+const createLeadUC = new CreateLeadUseCase(crmRepo)
 
 export default async function crmRoutes(fastify: FastifyInstance) {
   // Listar leads
   fastify.get('/leads', { preHandler: [fastify.authenticate] }, async (request, reply) => {
     try {
-      const filters = request.query as any
-      const result = await crmService.getLeads(filters)
-      return result
+      const { getLeadsQuerySchema } = require('./validation/leadSchemas')
+      const filters = getLeadsQuerySchema.parse(request.query)
+      const result = await new (require('./application/use-cases/GetLeads').GetLeadsUseCase)(crmRepo).execute(filters)
+      return reply.success(result)
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message })
+      return reply.fail({ message: error.message, details: error?.issues }, 400)
     }
   })
 
   // Criar lead
   fastify.post('/leads', { preHandler: [fastify.authenticate] }, async (request, reply) => {
     try {
-      const leadData = request.body as any
+      const { createLeadSchema } = require('./validation/leadSchemas')
+      const leadPayload = createLeadSchema.parse(request.body)
       const userId = (request as any).user.id
 
-      const lead = await crmService.createLead(leadData, userId)
-      return { lead }
+      const lead = await createLeadUC.execute({ ...leadPayload, createdBy: userId })
+      return reply.success({ lead })
     } catch (error: any) {
-      return reply.status(400).send({ error: error.message })
+      return reply.fail({ message: error.message, details: error?.issues }, 400)
     }
   })
 
   // Atualizar lead
   fastify.put('/leads/:id', { preHandler: [fastify.authenticate] }, async (request, reply) => {
     try {
+      const { updateLeadSchema } = require('./validation/leadSchemas')
       const { id } = request.params as { id: string }
-      const updateData = request.body as any
+      const updatePayload = updateLeadSchema.parse(request.body)
       const userId = (request as any).user.id
 
-      const lead = await crmService.updateLead(id, updateData, userId)
-      return { lead }
+      const { UpdateLeadUseCase } = require('./application/use-cases/UpdateLead')
+      const lead = await new UpdateLeadUseCase(crmRepo).execute(id, updatePayload, userId)
+      return reply.success({ lead })
     } catch (error: any) {
-      return reply.status(400).send({ error: error.message })
+      return reply.fail({ message: error.message, details: error?.issues }, 400)
     }
   })
 
@@ -47,10 +55,11 @@ export default async function crmRoutes(fastify: FastifyInstance) {
   fastify.get('/leads/:id', { preHandler: [fastify.authenticate] }, async (request, reply) => {
     try {
       const { id } = request.params as { id: string }
-      const lead = await crmService.getLeadById(id)
-      return { lead }
+      const { GetLeadByIdUseCase } = require('./application/use-cases/GetLeadById')
+      const lead = await new GetLeadByIdUseCase(crmRepo).execute(id)
+      return reply.success({ lead })
     } catch (error: any) {
-      return reply.status(404).send({ error: error.message })
+      return reply.fail({ message: error.message }, 404)
     }
   })
 
@@ -68,10 +77,10 @@ export default async function crmRoutes(fastify: FastifyInstance) {
       .order('created_at', { ascending: true })
 
     if (error) {
-      return reply.status(400).send({ error: error.message })
+      return reply.fail({ message: error.message }, 400)
     }
 
-    return { interactions: data }
+    return reply.success({ interactions: data })
   })
 
   // Criar interação
@@ -90,10 +99,10 @@ export default async function crmRoutes(fastify: FastifyInstance) {
       .single()
 
     if (error) {
-      return reply.status(400).send({ error: error.message })
+      return reply.fail({ message: error.message }, 400)
     }
 
-    return { interaction: data }
+    return reply.success({ interaction: data })
   })
 
   // Listar tarefas
@@ -124,10 +133,10 @@ export default async function crmRoutes(fastify: FastifyInstance) {
     const { data, error } = await query
 
     if (error) {
-      return reply.status(400).send({ error: error.message })
+      return reply.fail({ message: error.message }, 400)
     }
 
-    return { tasks: data }
+    return reply.success({ tasks: data })
   })
 
   // Criar tarefa
@@ -141,10 +150,10 @@ export default async function crmRoutes(fastify: FastifyInstance) {
       .single()
 
     if (error) {
-      return reply.status(400).send({ error: error.message })
+      return reply.fail({ message: error.message }, 400)
     }
 
-    return { task: data }
+    return reply.success({ task: data })
   })
 
   // Atualizar tarefa
@@ -160,19 +169,19 @@ export default async function crmRoutes(fastify: FastifyInstance) {
       .single()
 
     if (error) {
-      return reply.status(400).send({ error: error.message })
+      return reply.fail({ message: error.message }, 400)
     }
 
-    return { task: data }
+    return reply.success({ task: data })
   })
 
   // Estatísticas do dashboard
   fastify.get('/stats', { preHandler: [fastify.authenticate] }, async (request, reply) => {
     try {
       const stats = await crmService.getStats()
-      return stats
+      return reply.success(stats)
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message })
+      return reply.fail({ message: error.message }, 500)
     }
   })
 
@@ -180,40 +189,40 @@ export default async function crmRoutes(fastify: FastifyInstance) {
   fastify.get('/funnel', { preHandler: [fastify.authenticate] }, async (request, reply) => {
     try {
       const funnelData = await crmService.getFunnelData()
-      return { funnel: funnelData }
+      return reply.success({ funnel: funnelData })
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message })
+      return reply.fail({ message: error.message }, 500)
     }
   })
 
   // Atribuir lead
-  fastify.patch('/leads/:id/assign', { preHandler: [fastify.authenticate] }, async (request, reply) => {
+  fastify.patch('/leads/:id/assign', { preHandler: [fastify.authenticate, fastify.requireRole(['admin', 'gestor'])] }, async (request, reply) => {
     try {
       const { id } = request.params as { id: string }
-      const { assigned_to } = request.body as { assigned_to: string }
+      const body = (request.body || {}) as any
+      if (!body.assigned_to) throw new Error('assigned_to é obrigatório')
       const userId = (request as any).user.id
 
-      const lead = await crmService.assignLead(id, assigned_to, userId)
-      return { lead }
+      const { AssignLeadUseCase } = require('./application/use-cases/AssignLead')
+      const lead = await new AssignLeadUseCase(crmRepo).execute(id, body.assigned_to, userId)
+      return reply.success({ lead })
     } catch (error: any) {
-      return reply.status(400).send({ error: error.message })
+      return reply.fail({ message: error.message }, 400)
     }
   })
 
   // Atualização em lote de status
-  fastify.patch('/leads/bulk-status', { preHandler: [fastify.authenticate] }, async (request, reply) => {
+  fastify.patch('/leads/bulk-status', { preHandler: [fastify.authenticate, fastify.requireRole(['admin', 'gestor'])] }, async (request, reply) => {
     try {
-      const { lead_ids, status, reason } = request.body as {
-        lead_ids: string[]
-        status: string
-        reason?: string
-      }
+      const { bulkUpdateStatusSchema } = require('./validation/leadSchemas')
+      const { lead_ids, status, reason } = bulkUpdateStatusSchema.parse(request.body)
       const userId = (request as any).user.id
 
-      const results = await crmService.bulkUpdateStatus(lead_ids, status, userId, reason)
-      return { results }
+      const { BulkUpdateStatusUseCase } = require('./application/use-cases/BulkUpdateStatus')
+      const results = await new BulkUpdateStatusUseCase(crmRepo).execute(lead_ids, status, userId, reason)
+      return reply.success({ results })
     } catch (error: any) {
-      return reply.status(400).send({ error: error.message })
+      return reply.fail({ message: error.message, details: error?.issues }, 400)
     }
   })
 }

@@ -1,5 +1,6 @@
 import { supabase } from '../auth/supabase'
 import { OpenAI } from 'openai'
+import { botsCreatedCounter, botsErrorsCounter, botsFlowsCreatedCounter, botsMessagesProcessedCounter } from './infra/metrics'
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY!
@@ -55,8 +56,11 @@ export class BotService {
       .single()
 
     if (error) {
+      botsErrorsCounter.inc()
       throw new Error('Erro ao criar bot')
     }
+
+    botsCreatedCounter.inc()
 
     // Criar fluxo padrão
     await this.createDefaultFlow(bot.id)
@@ -80,6 +84,7 @@ export class BotService {
       .single()
 
     if (flowError) {
+      botsErrorsCounter.inc()
       throw new Error('Erro ao criar fluxo padrão')
     }
 
@@ -151,6 +156,7 @@ export class BotService {
       .select()
 
     if (blocksError) {
+      botsErrorsCounter.inc()
       throw new Error('Erro ao criar blocos padrão')
     }
 
@@ -167,6 +173,8 @@ export class BotService {
     await supabase
       .from('bot_connections')
       .insert(connections)
+
+    botsFlowsCreatedCounter.inc()
 
     return flow
   }
@@ -185,6 +193,8 @@ export class BotService {
     if (response.message) {
       await this.logMessage(session.id, session.current_block_id, 'outbound', 'text', response.message)
     }
+
+    botsMessagesProcessedCounter.inc()
 
     return response
   }

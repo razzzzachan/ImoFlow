@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { Plus, Mail, Phone, Shield, ShieldCheck, ShieldX, UserX } from 'lucide-react'
+import { useToast } from '../contexts/ToastContext'
+import { Loading } from '../components/Loading'
 
 interface User {
   id: string
@@ -22,10 +24,10 @@ export function UsersPage() {
   const [inviteEmail, setInviteEmail] = useState('')
   const [inviteRole, setInviteRole] = useState('corretor')
   const [inviteLoading, setInviteLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
 
-  const { user: currentUser } = useAuth()
+
+  const { user: currentUser, session } = useAuth()
+  const { toast } = useToast()
 
   useEffect(() => {
     fetchUsers()
@@ -35,7 +37,7 @@ export function UsersPage() {
     try {
       const response = await fetch('/api/auth/users', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('supabase.auth.token')}`
+          'Authorization': `Bearer ${session?.access_token || ''}`
         }
       })
 
@@ -53,15 +55,13 @@ export function UsersPage() {
   const handleInviteUser = async (e: React.FormEvent) => {
     e.preventDefault()
     setInviteLoading(true)
-    setError('')
-    setSuccess('')
 
     try {
       const response = await fetch('/api/auth/invite', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('supabase.auth.token')}`
+          'Authorization': `Bearer ${session?.access_token || ''}`
         },
         body: JSON.stringify({
           email: inviteEmail,
@@ -72,14 +72,14 @@ export function UsersPage() {
       const data = await response.json()
 
       if (response.ok) {
-        setSuccess(data.message)
+        toast('Convite enviado', 'success')
         setInviteEmail('')
         setShowInviteModal(false)
       } else {
-        setError(data.error)
+        toast(data?.error || 'Erro ao enviar convite', 'error')
       }
     } catch (err) {
-      setError('Erro ao enviar convite')
+      toast('Erro ao enviar convite', 'error')
     } finally {
       setInviteLoading(false)
     }
@@ -94,19 +94,19 @@ export function UsersPage() {
       const response = await fetch(`/api/auth/users/${userId}/deactivate`, {
         method: 'PATCH',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('supabase.auth.token')}`
+          'Authorization': `Bearer ${session?.access_token || ''}`
         }
       })
 
       if (response.ok) {
-        setSuccess('Usuário desativado com sucesso')
+        toast('Usuário desativado com sucesso', 'success')
         fetchUsers()
       } else {
         const data = await response.json()
-        setError(data.error)
+        toast(data?.error || 'Erro ao desativar usuário', 'error')
       }
     } catch (err) {
-      setError('Erro ao desativar usuário')
+      toast('Erro ao desativar usuário', 'error')
     }
   }
 
@@ -130,7 +130,7 @@ export function UsersPage() {
     return labels[role] || role
   }
 
-  if (!currentUser || !['admin', 'gestor'].includes(currentUser.role)) {
+  if (!currentUser || !['admin', 'gestor'].includes(currentUser.role || '')) {
     return (
       <div className="text-center py-12">
         <h2 className="text-2xl font-bold text-gray-900">Acesso Negado</h2>
@@ -140,11 +140,7 @@ export function UsersPage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>
-    )
+    return <Loading />
   }
 
   return (
@@ -164,19 +160,24 @@ export function UsersPage() {
         </button>
       </div>
 
-      {/* Mensagens */}
-      {error && (
-        <div className="text-red-600 text-sm bg-red-50 p-3 rounded-md">{error}</div>
-      )}
-      
-      {success && (
-        <div className="text-green-600 text-sm bg-green-50 p-3 rounded-md">{success}</div>
-      )}
+      <div className="flex justify-end">
+        <button onClick={fetchUsers} disabled={loading} className="px-3 py-1.5 text-sm border rounded hover:bg-gray-50 disabled:opacity-50">
+          Recarregar
+        </button>
+      </div>
+
+
 
       {/* Lista de usuários */}
-      <div className="bg-white shadow overflow-hidden sm:rounded-md">
-        <ul className="divide-y divide-gray-200">
-          {users.map((user) => (
+      {users.length === 0 ? (
+        <div className="text-center py-12 bg-white rounded-md border border-gray-200">
+          <h3 className="text-sm font-medium text-gray-900">Nenhum usuário encontrado</h3>
+          <p className="mt-1 text-sm text-gray-500">Convide alguém para começar.</p>
+        </div>
+      ) : (
+        <div className="bg-white shadow overflow-hidden sm:rounded-md">
+          <ul className="divide-y divide-gray-200">
+            {users.map((user) => (
             <li key={user.id}>
               <div className="px-4 py-4 flex items-center justify-between">
                 <div className="flex items-center">
@@ -215,7 +216,7 @@ export function UsersPage() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center space-x-2">
                   {user.is_active && user.id !== currentUser.id && (
                     <button
@@ -232,6 +233,8 @@ export function UsersPage() {
           ))}
         </ul>
       </div>
+      )}
+
 
       {/* Modal de convite */}
       {showInviteModal && (
@@ -239,7 +242,7 @@ export function UsersPage() {
           <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
             <div className="mt-3">
               <h3 className="text-lg font-medium text-gray-900 mb-4">Convidar Usuário</h3>
-              
+
               <form onSubmit={handleInviteUser} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -254,7 +257,7 @@ export function UsersPage() {
                     placeholder="email@exemplo.com"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Função
@@ -274,7 +277,7 @@ export function UsersPage() {
                     )}
                   </select>
                 </div>
-                
+
                 <div className="flex justify-end space-x-3 pt-4">
                   <button
                     type="button"

@@ -6,28 +6,33 @@
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "lint": "eslint . --ext .ts"
+    "lint": "eslint . --ext .ts",
+    "smoke": "powershell -ExecutionPolicy Bypass -File scripts/smoke.ps1 -Token $env:API_TOKEN",
+    "smoke:sh": "bash scripts/smoke.sh"
   },
   "dependencies": {
-    "fastify": "^4.24.0",
     "@fastify/cors": "^8.4.0",
-    "@fastify/multipart": "^8.0.0",
-    "@fastify/jwt": "^7.2.0",
     "@fastify/env": "^4.2.0",
+    "@fastify/helmet": "^11.1.1",
+    "@fastify/jwt": "^7.2.0",
+    "@fastify/multipart": "^8.0.0",
+    "@fastify/rate-limit": "^9.1.0",
     "@supabase/supabase-js": "^2.38.0",
-    "openai": "^4.20.0",
+    "dotenv": "^16.3.0",
+    "fastify": "^4.24.0",
     "langchain": "^0.0.200",
-    "pdf-parse": "^1.1.1",
     "multer": "^1.4.5-lts.1",
-    "whatsapp-web.js": "^1.23.0",
+    "openai": "^4.20.0",
+    "pdf-parse": "^1.1.1",
+    "prom-client": "^15.1.3",
     "puppeteer": "^21.5.0",
     "qrcode": "^1.5.3",
-    "zod": "^3.22.0",
-    "dotenv": "^16.3.0"
+    "whatsapp-web.js": "^1.23.0",
+    "zod": "^3.22.0"
   },
   "devDependencies": {
-    "@types/node": "^20.10.0",
     "@types/multer": "^1.4.11",
+    "@types/node": "^20.10.0",
     "@types/qrcode": "^1.5.5",
     "tsx": "^4.6.0"
   }

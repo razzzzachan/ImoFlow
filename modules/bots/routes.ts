@@ -33,16 +33,13 @@ export default async function botRoutes(fastify: FastifyInstance) {
   fastify.post('/bots', { preHandler: [fastify.authenticate] }, async (request, reply) => {
     try {
       const userId = (request as any).user.id
-      const { name, description, mode } = request.body as {
-        name: string
-        description?: string
-        mode?: string
-      }
+      const { createBotSchema } = require('./validation/schemas')
+      const { name, description, mode } = createBotSchema.parse(request.body)
 
       const bot = await botService.createBot(userId, name, description, mode)
-      return { bot }
+      return reply.success({ bot })
     } catch (error: any) {
-      return reply.status(400).send({ error: error.message })
+      return reply.fail({ message: error.message, details: error?.issues }, 400)
     }
   })
 
@@ -144,16 +141,13 @@ export default async function botRoutes(fastify: FastifyInstance) {
   fastify.post('/bots/:id/message', async (request, reply) => {
     try {
       const { id } = request.params as { id: string }
-      const { channel_user_id, message, channel } = request.body as {
-        channel_user_id: string
-        message: string
-        channel?: string
-      }
+      const { messageSchema } = require('./validation/schemas')
+      const { channel_user_id, message, channel } = messageSchema.parse(request.body)
 
       const response = await botService.processMessage(id, channel_user_id, message, channel)
-      return response
+      return reply.success(response)
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message })
+      return reply.fail({ message: error.message, details: error?.issues }, 500)
     }
   })
 
@@ -199,10 +193,8 @@ export default async function botRoutes(fastify: FastifyInstance) {
     try {
       const { id } = request.params as { id: string }
       const userId = (request as any).user.id
-      const { name, description } = request.body as {
-        name: string
-        description?: string
-      }
+      const { createFlowSchema } = require('./validation/schemas')
+      const { name, description } = createFlowSchema.parse(request.body)
 
       // Verificar se o bot pertence ao usuário
       const { data: bot } = await supabase
@@ -213,7 +205,7 @@ export default async function botRoutes(fastify: FastifyInstance) {
         .single()
 
       if (!bot) {
-        return reply.status(404).send({ error: 'Bot não encontrado' })
+        return reply.fail({ message: 'Bot não encontrado' }, 404)
       }
 
       const { data: flow, error } = await supabase
@@ -227,12 +219,12 @@ export default async function botRoutes(fastify: FastifyInstance) {
         .single()
 
       if (error) {
-        return reply.status(400).send({ error: error.message })
+        return reply.fail({ message: error.message }, 400)
       }
 
-      return { flow }
+      return reply.success({ flow })
     } catch (error: any) {
-      return reply.status(500).send({ error: error.message })
+      return reply.fail({ message: error.message, details: error?.issues }, 500)
     }
   })
 
@@ -314,46 +306,45 @@ export default async function botRoutes(fastify: FastifyInstance) {
         .single()
 
       if (!bot) {
-        return reply.status(404).send({ error: 'Bot não encontrado' })
+        return reply.fail({ message: 'Bot não encontrado' }, 404)
       }
 
-      // Buscar estatísticas
-      const { data: totalSessions } = await supabase
+      // Buscar estatísticas (usando count via headers)
+      const totalSessionsRes = await supabase
         .from('bot_sessions')
-        .select('id', { count: 'exact' })
+        .select('id', { count: 'exact', head: true })
         .eq('bot_id', id)
 
-      const { data: activeSessions } = await supabase
+      const activeSessionsRes = await supabase
         .from('bot_sessions')
-        .select('id', { count: 'exact' })
+        .select('id', { count: 'exact', head: true })
         .eq('bot_id', id)
         .eq('is_active', true)
 
-      const { data: leadsCreated } = await supabase
+      const leadsCreatedRes = await supabase
         .from('bot_sessions')
-        .select('lead_id', { count: 'exact' })
+        .select('lead_id', { count: 'exact', head: true })
         .eq('bot_id', id)
         .not('lead_id', 'is', null)
 
-      const { data: messagesCount } = await supabase
-        .from('bot_messages')
-        .select('id', { count: 'exact' })
-        .in('session_id', 
-          await supabase
-            .from('bot_sessions')
-            .select('id')
-            .eq('bot_id', id)
-            .then(res => res.data?.map(s => s.id) || [])
-        )
+      const sessionIds = await supabase
+        .from('bot_sessions')
+        .select('id')
+        .eq('bot_id', id)
 
-      return {
+      const messagesRes = await supabase
+        .from('bot_messages')
+        .select('id', { count: 'exact', head: true })
+        .in('session_id', (sessionIds.data || []).map(s => s.id))
+
+      return reply.success({
         stats: {
-          total_sessions: totalSessions?.length || 0,
-          active_sessions: activeSessions?.length || 0,
-          leads_created: leadsCreated?.length || 0,
-          total_messages: messagesCount?.length || 0
+          total_sessions: totalSessionsRes.count || 0,
+          active_sessions: activeSessionsRes.count || 0,
+          leads_created: leadsCreatedRes.count || 0,
+          total_messages: messagesRes.count || 0
         }
-      }
+      })
     } catch (error: any) {
       return reply.status(500).send({ error: error.message })
     }

@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { ArrowLeft, Save, Play, Pause, Plus, MessageSquare, Settings, Users } from 'lucide-react'
+import { useAuth } from '../contexts/AuthContext'
+import { useToast } from '../contexts/ToastContext'
+import { Loading } from '../components/Loading'
 
 interface Bot {
   id: string
@@ -30,12 +33,12 @@ interface Block {
 
 export function BotEditPage() {
   const { id } = useParams<{ id: string }>()
+  const { session } = useAuth()
+  const { toast } = useToast()
   const [bot, setBot] = useState<Bot | null>(null)
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('config')
   const [saving, setSaving] = useState(false)
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
 
   useEffect(() => {
     if (id) {
@@ -47,7 +50,7 @@ export function BotEditPage() {
     try {
       const response = await fetch(`/api/bots/bots/${id}`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('supabase.auth.token')}`
+          'Authorization': `Bearer ${session?.access_token || ''}`
         }
       })
 
@@ -55,11 +58,11 @@ export function BotEditPage() {
         const data = await response.json()
         setBot(data.bot)
       } else {
-        setError('Bot não encontrado')
+        toast('Bot não encontrado', 'error')
       }
     } catch (error) {
       console.error('Erro ao buscar bot:', error)
-      setError('Erro ao carregar bot')
+      toast('Erro ao carregar bot', 'error')
     } finally {
       setLoading(false)
     }
@@ -69,15 +72,13 @@ export function BotEditPage() {
     if (!bot) return
 
     setSaving(true)
-    setError('')
-    setSuccess('')
 
     try {
       const response = await fetch(`/api/bots/bots/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('supabase.auth.token')}`
+          'Authorization': `Bearer ${session?.access_token || ''}`
         },
         body: JSON.stringify({
           name: bot.name,
@@ -87,13 +88,13 @@ export function BotEditPage() {
       })
 
       if (response.ok) {
-        setSuccess('Bot salvo com sucesso!')
+        toast('Bot salvo com sucesso!', 'success')
       } else {
         const data = await response.json()
-        setError(data.error)
+        toast(data?.error || 'Erro ao salvar bot', 'error')
       }
     } catch (err) {
-      setError('Erro ao salvar bot')
+      toast('Erro ao salvar bot', 'error')
     } finally {
       setSaving(false)
     }
@@ -106,7 +107,7 @@ export function BotEditPage() {
       const response = await fetch(`/api/bots/bots/${id}/toggle`, {
         method: 'PATCH',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('supabase.auth.token')}`
+          'Authorization': `Bearer ${session?.access_token || ''}`
         }
       })
 
@@ -119,11 +120,7 @@ export function BotEditPage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>
-    )
+    return <Loading />
   }
 
   if (!bot) {
@@ -195,15 +192,6 @@ export function BotEditPage() {
           </button>
         </div>
       </div>
-
-      {/* Mensagens */}
-      {error && (
-        <div className="text-red-600 text-sm bg-red-50 p-3 rounded-md">{error}</div>
-      )}
-      
-      {success && (
-        <div className="text-green-600 text-sm bg-green-50 p-3 rounded-md">{success}</div>
-      )}
 
       {/* Tabs */}
       <div className="border-b border-gray-200">

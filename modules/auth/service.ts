@@ -91,12 +91,24 @@ export class AuthService {
         }])
 
       if (userError) {
-        // Se falhar, deletar usuário do auth
-        await supabase.auth.admin.deleteUser(data.user.id)
-        throw new Error('Erro ao criar perfil do usuário')
+        // Se já existe (por trigger), ignoramos o erro de duplicidade
+        const msg = String(userError.message || '')
+        const isDuplicate = msg.includes('duplicate key value') || msg.includes('already exists')
+        if (!isDuplicate) {
+          // Mantém o usuário do auth e reporta erro real
+          throw new Error('Erro ao criar perfil do usuário')
+        }
       }
 
-      // Enviar email de confirmação (se configurado)
+      // Confirma email automaticamente em dev para facilitar o login
+      try {
+        await supabase.auth.admin.updateUserById(data.user.id, { email_confirm: true })
+      } catch (e) {
+        // se falhar, apenas segue sem travar o fluxo
+        console.warn('Falha ao autoconfirmar email (dev):', e)
+      }
+
+      // Enviar email de confirmação (opcional)
       try {
         await this.sendVerificationEmail(userData.email, userData.name)
       } catch (emailError) {
@@ -107,7 +119,7 @@ export class AuthService {
     return {
       user: data.user,
       session: data.session,
-      message: 'Usuário criado com sucesso. Verifique seu email para ativar a conta.'
+      message: 'Usuário criado com sucesso.'
     }
   }
 
