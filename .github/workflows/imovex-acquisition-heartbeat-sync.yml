@@ -1,0 +1,43 @@
+name: Imovex Acquisition Heartbeat Sync
+
+on:
+  schedule:
+    - cron: '25 11 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync-vault:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+      MARKETING_HEARTBEAT_CRON_URL: ${{ secrets.MARKETING_HEARTBEAT_CRON_URL }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Sync acquisition heartbeat vault
+        run: node scripts/marketing/sync-acquisition-heartbeat-vault.mjs
+
+      - name: Commit vault update
+        run: |
+          if git diff --quiet --exit-code -- vault-imovex/10-heartbeat-aquisicao-auto.md; then
+            echo "No heartbeat changes to commit."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add vault-imovex/10-heartbeat-aquisicao-auto.md
+          git commit -m "chore: sync acquisition heartbeat vault"
+          git push

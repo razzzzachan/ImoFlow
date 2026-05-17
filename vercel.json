@@ -1,0 +1,26 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "npm ci --workspace=apps/web --include-workspace-root=false",
+  "buildCommand": "npm run build --workspace=apps/web",
+  "outputDirectory": "apps/web/dist",
+  "crons": [
+    {
+      "path": "/api/ai/memory-snapshots-cron",
+      "schedule": "0 */6 * * *"
+    },
+    {
+      "path": "/api/marketing/acquisition-heartbeat-cron",
+      "schedule": "15 11 * * *"
+    },
+    {
+      "path": "/api/marketing/conversions-cron",
+      "schedule": "*/15 * * * *"
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/((?!api/).*)",
+      "destination": "/"
+    }
+  ]
+}
