@@ -1,15 +1,15 @@
 # Heartbeat de Aquisicao Auto
 
 > Arquivo auto-gerado. Nao editar manualmente.
-> Gerado em 2026-06-21T13:19:29.647Z para o snapshot local 2026-06-21.
+> Gerado em 2026-06-22T16:03:59.906Z para o snapshot local 2026-06-22.
 
 Status geral: degraded
 Janela: ultimos 7 dias
 
 ## Resumo
-- Backend: 13 lp_view, 33 auth_view, 1 proof_section_view, 0 cta_click, 0 signup_started, 0 signup_completed nos ultimos 7 dias.
+- Backend: 12 lp_view, 1 auth_view, 1 proof_section_view, 0 cta_click, 0 signup_started, 0 signup_completed nos ultimos 7 dias.
 - Google Ads: 5 campanha(s) no filtro Imovex, 0 clique(s) e 0 conversao(oes) em 7 dias.
-- GA4: 10 sessions, 2 engagedSessions e engagementRate 20%.
+- GA4: 9 sessions, 2 engagedSessions e engagementRate 22%.
 - Hotjar: review manual continua obrigatorio porque a API oficial atual nao cobre recordings/heatmaps deste ritual.
 
 ## Acoes do Dia
@@ -18,7 +18,7 @@ Janela: ultimos 7 dias
 - Manter revisao manual de 3 a 5 gravacoes recentes no Hotjar; a automacao ainda nao substitui comportamento visual.
 
 ## Backend
-- total de touchpoints: 93
+- total de touchpoints: 27
 - funil curto: cta_click=0, signup_started=0, signup_completed=0
 
 ## Google Ads
@@ -30,10 +30,10 @@ Janela: ultimos 7 dias
 
 ## GA4
 - propertyId: 538032834
-- sessions: 10
+- sessions: 9
 - engagedSessions: 2
-- engagementRate: 20%
-- eventos lidos: page_view=31, lp_view=10, auth_form_started=1, auth_google_started=1, proof_section_view=1
+- engagementRate: 22%
+- eventos lidos: page_view=30, lp_view=9, auth_form_started=1, auth_google_started=1, proof_section_view=1
 
 ## Hotjar
 - A API oficial atual do Hotjar nao entrega feed de recordings/heatmaps para este ritual; manter revisao manual de 3 a 5 gravacoes. Ainda nao apareceu sessao correlacionada suficiente nos itens recentes do backend.
