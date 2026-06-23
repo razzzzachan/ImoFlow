@@ -1,24 +1,24 @@
 # Heartbeat de Aquisicao Auto
 
 > Arquivo auto-gerado. Nao editar manualmente.
-> Gerado em 2026-06-22T16:03:59.906Z para o snapshot local 2026-06-22.
+> Gerado em 2026-06-23T13:56:43.696Z para o snapshot local 2026-06-23.
 
 Status geral: degraded
 Janela: ultimos 7 dias
 
 ## Resumo
-- Backend: 12 lp_view, 1 auth_view, 1 proof_section_view, 0 cta_click, 0 signup_started, 0 signup_completed nos ultimos 7 dias.
+- Backend: 10 lp_view, 0 auth_view, 0 proof_section_view, 0 cta_click, 0 signup_started, 0 signup_completed nos ultimos 7 dias.
 - Google Ads: 5 campanha(s) no filtro Imovex, 0 clique(s) e 0 conversao(oes) em 7 dias.
-- GA4: 9 sessions, 2 engagedSessions e engagementRate 22%.
-- Hotjar: review manual continua obrigatorio porque a API oficial atual nao cobre recordings/heatmaps deste ritual.
+- GA4: 10 sessions, 1 engagedSessions e engagementRate 10%.
+- Hotjar: fila automatica com 1 caso(s) priorizado(s) em 1 sessao(oes) correlacionadas; lookup por prefixo user/session.
 
 ## Acoes do Dia
 - Ajustar LP: existe visita suficiente, mas a CTA principal ainda nao esta convertendo em clique.
 - Ajustar LP: pouco trafego chega na prova do produto em relacao ao volume de lp_view.
-- Manter revisao manual de 3 a 5 gravacoes recentes no Hotjar; a automacao ainda nao substitui comportamento visual.
+- Revisar fila automatica do Hotjar: lp_view sem chegar na prova (1); a leitura visual continua obrigatoria.
 
 ## Backend
-- total de touchpoints: 27
+- total de touchpoints: 20
 - funil curto: cta_click=0, signup_started=0, signup_completed=0
 
 ## Google Ads
@@ -30,13 +30,14 @@ Janela: ultimos 7 dias
 
 ## GA4
 - propertyId: 538032834
-- sessions: 9
-- engagedSessions: 2
-- engagementRate: 22%
-- eventos lidos: page_view=30, lp_view=9, auth_form_started=1, auth_google_started=1, proof_section_view=1
+- sessions: 10
+- engagedSessions: 1
+- engagementRate: 10%
+- eventos lidos: lp_view=10, page_view=10, proof_section_view=1
 
 ## Hotjar
-- A API oficial atual do Hotjar nao entrega feed de recordings/heatmaps para este ritual; manter revisao manual de 3 a 5 gravacoes. Ainda nao apareceu sessao correlacionada suficiente nos itens recentes do backend.
-- siteId: n/d
-- correlacao automatica: 0 sessoes, 0 touchpoints e 0 conversoes com metadados Hotjar nos itens recentes
-- fila automatica de revisao: nenhuma sessao acionavel com correlacao suficiente nos itens recentes.
+- A API oficial atual do Hotjar nao entrega feed de recordings/heatmaps para este ritual; manter revisao manual de 3 a 5 gravacoes. Fila automatica montada com 1 caso(s) priorizado(s) a partir de 1 sessao(oes) correlacionadas no backend.
+- siteId: 6712783
+- correlacao automatica: 1 sessoes, 2 touchpoints e 0 conversoes com metadados Hotjar nos itens recentes
+- fila automatica de revisao:
+  - medium | lp_view sem chegar na prova | lookup=user:2b9ece57 | anon:8ef7e2df | site:6712783 | source=public_track | path=/atendimento-imobiliario-com-ia | at=2026-06-22T19:18:04.51+00:00 | trilha=page_view -> lp_view
