@@ -1,7 +1,7 @@
 # Heartbeat de Aquisicao Auto
 
 > Arquivo auto-gerado. Nao editar manualmente.
-> Gerado em 2026-06-25T13:30:17.659Z para o snapshot local 2026-06-25.
+> Gerado em 2026-06-26T13:24:55.032Z para o snapshot local 2026-06-26.
 
 Status geral: ok
 Janela: ultimos 7 dias
@@ -9,7 +9,7 @@ Janela: ultimos 7 dias
 ## Resumo
 - Backend: 7 lp_view, 0 auth_view, 2 proof_section_view, 0 cta_click, 0 signup_started, 0 signup_completed nos ultimos 7 dias.
 - Google Ads: 5 campanha(s) no filtro Imovex, 0 clique(s) e 0 conversao(oes) em 7 dias.
-- GA4: 8 sessions, 2 engagedSessions e engagementRate 25%.
+- GA4: 4 sessions, 2 engagedSessions e engagementRate 50%.
 - Hotjar: fila automatica com 1 caso(s) priorizado(s) em 1 sessao(oes) correlacionadas; lookup por prefixo user/session.
 
 ## Acoes do Dia
@@ -28,10 +28,10 @@ Janela: ultimos 7 dias
 
 ## GA4
 - propertyId: 538032834
-- sessions: 8
+- sessions: 4
 - engagedSessions: 2
-- engagementRate: 25%
-- eventos lidos: lp_view=7, page_view=7, proof_section_view=1
+- engagementRate: 50%
+- eventos lidos: lp_view=3, page_view=3, proof_section_view=1
 
 ## Hotjar
 - A API oficial atual do Hotjar nao entrega feed de recordings/heatmaps para este ritual; manter revisao manual de 3 a 5 gravacoes. Fila automatica montada com 1 caso(s) priorizado(s) a partir de 1 sessao(oes) correlacionadas no backend.
