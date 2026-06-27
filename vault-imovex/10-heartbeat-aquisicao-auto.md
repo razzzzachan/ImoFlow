@@ -1,22 +1,22 @@
 # Heartbeat de Aquisicao Auto
 
 > Arquivo auto-gerado. Nao editar manualmente.
-> Gerado em 2026-06-26T13:24:55.032Z para o snapshot local 2026-06-26.
+> Gerado em 2026-06-27T12:46:51.920Z para o snapshot local 2026-06-27.
 
 Status geral: ok
 Janela: ultimos 7 dias
 
 ## Resumo
-- Backend: 7 lp_view, 0 auth_view, 2 proof_section_view, 0 cta_click, 0 signup_started, 0 signup_completed nos ultimos 7 dias.
+- Backend: 6 lp_view, 0 auth_view, 2 proof_section_view, 0 cta_click, 0 signup_started, 0 signup_completed nos ultimos 7 dias.
 - Google Ads: 5 campanha(s) no filtro Imovex, 0 clique(s) e 0 conversao(oes) em 7 dias.
-- GA4: 4 sessions, 2 engagedSessions e engagementRate 50%.
+- GA4: 3 sessions, 2 engagedSessions e engagementRate 67%.
 - Hotjar: fila automatica com 1 caso(s) priorizado(s) em 1 sessao(oes) correlacionadas; lookup por prefixo user/session.
 
 ## Acoes do Dia
 - Revisar fila automatica do Hotjar: prova vista sem CTA nem cadastro (1); a leitura visual continua obrigatoria.
 
 ## Backend
-- total de touchpoints: 16
+- total de touchpoints: 14
 - funil curto: cta_click=0, signup_started=0, signup_completed=0
 
 ## Google Ads
@@ -28,9 +28,9 @@ Janela: ultimos 7 dias
 
 ## GA4
 - propertyId: 538032834
-- sessions: 4
+- sessions: 3
 - engagedSessions: 2
-- engagementRate: 50%
+- engagementRate: 67%
 - eventos lidos: lp_view=3, page_view=3, proof_section_view=1
 
 ## Hotjar
